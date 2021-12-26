@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void check(unsigned long long x){
+    unsigned long long orig = x;
+    do{
+        if (x % 2 == 0){
+            x /= 2;
+        }
+        else{
+            x = (3*x + 1)/2;
+        }
+    }while(x > orig);
+    if(x == orig){
+        printf("Collatz is False: %llu", orig);
+        exit(0);
+    }
+}
+
+char effCollatz(unsigned long long end){
