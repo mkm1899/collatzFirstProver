@@ -1,4 +1,7 @@
 from sympy import *
+import graphviz
+from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
 # The Node Class defines the structure of a Node
 class Vertex:
     # Initialize the attributes of Node
@@ -8,34 +11,25 @@ class Vertex:
         self.data = data # Node Data
         self.n = k # what n is equal to at this point
         self.id = -1
-
-    def print(self, depth):
+        
+    def print(self):
         queue = []
-        queue.append((self.left, 1))
-        queue.append((self.right, 1))
 
-        overallLength = (2**(depth))# - 2
-        tabs = '\t'*(overallLength//2)
-
-        print(tabs, self, end="")
-        currentHeight = 0
+        root = Node(str(self))
+        queue.append((self.left, root))
+        queue.append((self.right, root))
+        
         while(queue):
             temp = queue.pop(0)
-            if(temp[1] >= depth):
-                return
-            if(temp[1] != currentHeight):
-                currentHeight = temp[1]
-                tabs = '\t'*(overallLength//(currentHeight*4))
-                print()
-                #probably needs different spacing for the first of any height which you can do here
             if(temp[0] == None):
-                print(tabs, tabs, end="")
-                queue.append((None, temp[1]+1))
-                queue.append((None, temp[1]+1))
                 continue
-            queue.append((temp[0].left, temp[1] + 1))
-            queue.append((temp[0].right, temp[1] + 1))
-            print(tabs, temp[0], tabs, end="")
+            parent = temp[1]
+            cur = Node(str(temp[0]), parent=parent)
+            queue.append((temp[0].left, cur))
+            queue.append((temp[0].right, cur))
+
+        DotExporter(root).to_picture("root.png")
+        
             
     def printAllTerminatingStuff(self):
         queue = []
@@ -84,7 +78,7 @@ class Vertex:
             stack.append((temp[0].left, x))
     
     def __str__(self):
-        return str(self.n)
+        return str(self.n)+"\n"+str(self.data)
 
 
 

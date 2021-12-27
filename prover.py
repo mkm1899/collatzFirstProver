@@ -81,7 +81,8 @@ def CreateTree(depth):
 
 #root = Vertex(k, k)
 #root.print(0)
-Maxdepth = 6
+Maxdepth = 10
 r = CreateTree(Maxdepth)
 r.printAllTerminatingStuff()
+r.print()
     
