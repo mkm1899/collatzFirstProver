@@ -1,13 +1,10 @@
 from sympy import *
+from sympy.simplify.fu import L
 from binary import Vertex
+import pickle
+import signal
 k = symbols('k')
-#expr = 2*k + 2
-#x = str(expr)
-#print(type(x))
-#print(x)
-#print(expr)
-#expr = (expr)/2
-#print(expr)
+r = None
 
 #Checks if that k is even
 def ifEven(expr):
@@ -40,7 +37,7 @@ def isOdd(expr):
 
 def createTree(V, depth, endDepth):
     if depth > endDepth:
-        return
+        return# V, depth
     change = True
     while(change):
         change = False
@@ -58,12 +55,9 @@ def createTree(V, depth, endDepth):
         if '0' == str(simplify(V.data - V.n)):
             print("Collatz conjecture is false or more likely I made a mistake")
             print(V.data,"\t", V.n)
-            return
+            return# None
         if '-' in str(simplify(V.data - V.n)):
-            #print(str(simplify(V.data - V.n)))
-            #print("It cannot be the first")
-            #print(V.data,"\t", V.n)
-            return
+            return# None
 
     if(depth != endDepth-1):
         V.left = Vertex(ifEven(V.data), ifEven(V.n))
@@ -77,12 +71,78 @@ def CreateTree(depth):
     createTree(root, 0 , depth)
     return root
 
+def saveTree(root):
+    with open('tree.pkl', 'wb') as outp:
+        pickle.dump(root, outp, pickle.HIGHEST_PROTOCOL)
+
+def loadTree():
+    root = None
+    try:
+        with open('tree.pkl', 'rb') as inp:
+            root = pickle.load(inp)
+    except FileNotFoundError:
+        root = None
+    return root
 
 
-#root = Vertex(k, k)
-#root.print(0)
-Maxdepth = 10
-r = CreateTree(Maxdepth)
+def runFromLoad(root, depth):
+    leaves = root.getUnFinishedLeafNodes()
+    for x in leaves:
+        createTree(x[0], x[1], depth)
+
+
+def exit_gracefully(signum, frame):
+    saveTree(r)
+    exit(0)
+
+#-1 depth means infinite
+def prove(depth):
+    global r
+    step = 3
+    r = loadTree()
+    if r == None:
+        if depth <= 16 and depth != -1:
+            r = CreateTree(depth)
+        else:
+            r = CreateTree(16)
+    signal.signal(signal.SIGINT, exit_gracefully)
+    ndepth = 16 + step
+    while(ndepth < depth or depth == -1):
+        runFromLoad(r, ndepth)
+        ndepth += step
+    runFromLoad(r, depth)
+
+    
+
+#-1 equal something special
+
+prove(10)
+#saveTree(r)
+#r = loadTree()
+#r = CreateTree(10)
 r.printAllTerminatingStuff()
-r.print()
+r.printAllNotFirstFromData()
+
+#r = loadTree()
+#if r == None:
+#r = CreateTree(Maxdepth)
+#r.print("tree16.svg")
+
+
+
+#while(True):
+#    Maxdepth += 1
+#    l = runFromLoad(r, Maxdepth, l)
+#r.printAllTerminatingStuff()
+#r.print("root12.png")
+
+#saveTree(r)
+#r = loadTree()
+#runFromLoad(r)
+
+#r.printAllTerminatingStuff()
+#r.print("treeFromLoad.png")
+
+#r = CreateTree(10)
+#r.print("tree.png")
     
