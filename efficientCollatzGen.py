@@ -1,4 +1,4 @@
-f = open("equations.txt", "r")
+f = open("equationsV2.txt", "r")
 Start = 3
 
 
@@ -9,6 +9,13 @@ def addCol(oldIncBy, forBody):
     for i in range(len(forBody)):
         x = forBody[i]
         forBody.append(x + oldIncBy)
+    return forBody
+
+def addCol3(oldIncBy, forBody):
+    for i in range(len(forBody)):
+        x = forBody[i]
+        forBody.append(x + oldIncBy)
+        forBody.append(x + 2*oldIncBy)
     return forBody
 
 def breakEquation(equation):
@@ -27,22 +34,40 @@ def remCol(forbody, equation):
             forbody.pop(i)
     return forbody
 
+#does loop unrolling while removing unnecessary checks proven by 2^n
+def loopUnroll2():
+    forBody = initForBody()
+    incBy = 1
+    for x in f:
+        if x[0] == '\t':
+            eq = x[6:-1]
+            knum, _  = breakEquation(eq)
+            while(knum > incBy):
+                forBody = addCol(incBy, forBody)
+                incBy *= 2
+            remCol(forBody, eq)
+    return forBody, incBy
 
-forBody = initForBody()
-incBy = 1
-for x in f:
-    if x[0] == '\t':
-        eq = x[6:-1]
-        knum, _  = breakEquation(eq)
-        while(knum > incBy):
-            forBody = addCol(incBy, forBody)
-            incBy *= 2
-        remCol(forBody, eq)
+#does loop unrolling while removing unnecessary checks proven by 3^n
+def loopUnroll3():
+    forBody = initForBody()
+    incBy = 1
+    for x in f:
+        if x[0] == '\t':
+            eq = x[6:-1]
+            knum, _  = breakEquation(eq)
+            while(knum > incBy):
+                forBody = addCol3(incBy, forBody)
+                incBy *= 3
+            remCol(forBody, eq)
+    return forBody, incBy
+
+forBody, incBy = loopUnroll2()
 
 #NOW WRITES THE CODE
 f.close()
 f = open("header.txt", "r")
-f2 = open("collatz3.c", "w")
+f2 = open("collatz4.c", "w")
 f2.write(f.read())
 f.close()
 x = "\tfor(int i = " + str(Start) + "; i < end; i+=" + str(incBy)+ "){\n"
